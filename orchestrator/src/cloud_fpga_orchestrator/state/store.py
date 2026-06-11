@@ -120,3 +120,19 @@ async def get_job_result(redis: Redis, job_id: UUID) -> list[int] | None:
     import json
     value = await redis.get(keys.job_result(str(job_id)))
     return json.loads(value) if value else None
+
+
+async def set_current_job(redis: Redis, fpga_id: int, job_id: UUID) -> None:
+    """Record which job is currently executing on an FPGA."""
+    await redis.set(keys.fpga_current_job(fpga_id), str(job_id))
+
+
+async def get_current_job(redis: Redis, fpga_id: int) -> UUID | None:
+    """Return the ID of the job currently executing on an FPGA, or None if idle."""
+    value = await redis.get(keys.fpga_current_job(fpga_id))
+    return UUID(value.decode()) if value else None
+
+
+async def clear_current_job(redis: Redis, fpga_id: int) -> None:
+    """Clear the current job record for an FPGA once the job finishes."""
+    await redis.delete(keys.fpga_current_job(fpga_id))

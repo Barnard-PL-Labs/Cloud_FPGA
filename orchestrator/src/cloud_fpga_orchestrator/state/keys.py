@@ -26,3 +26,8 @@ def job_log(job_id: str) -> str:
 def job_result(job_id: str) -> str:
     """Return the Redis key for a run job's response data."""
     return f"job:{job_id}:result"
+
+
+def fpga_current_job(fpga_id: int) -> str:
+    """Return the Redis key tracking the job currently running on an FPGA."""
+    return f"fpga:{fpga_id}:current_job"

@@ -16,7 +16,7 @@ from ..state import (
     transition_fpga_state,
     update_job_status,
 )
-from ..state.store import append_job_log, set_job_result
+from ..state.store import append_job_log, clear_current_job, set_current_job, set_job_result
 from .host_client import HostAgentError, HostClient
 from .protocol import WishboneOp, WishboneRequest
 
@@ -36,6 +36,7 @@ async def handle_build_and_program(
         host: Host agent client for flash operations.
         job: The job record. Must have context["source_path"] and context["owner"].
     """
+    await set_current_job(redis, job.fpga_id, job.job_id)
     await transition_fpga_state(redis, job.fpga_id, FPGAState.BUILDING)
     await update_job_status(redis, job.job_id, JobStatus.RUNNING)
 
@@ -50,6 +51,7 @@ async def handle_build_and_program(
             await append_job_log(redis, job.job_id, exc.log)
             await update_job_status(redis, job.job_id, JobStatus.FAILED)
             await transition_fpga_state(redis, job.fpga_id, FPGAState.IDLE)
+            await clear_current_job(redis, job.fpga_id)
             return
 
         for stage, log in result.logs.items():
@@ -64,11 +66,13 @@ async def handle_build_and_program(
             await append_job_log(redis, job.job_id, str(exc))
             await update_job_status(redis, job.job_id, JobStatus.FAILED)
             await transition_fpga_state(redis, job.fpga_id, FPGAState.ERROR)
+            await clear_current_job(redis, job.fpga_id)
             return
 
     await transition_fpga_state(redis, job.fpga_id, FPGAState.RESERVED)
     await create_session(redis, job.fpga_id, job.context["owner"], _SESSION_TTL)
     await update_job_status(redis, job.job_id, JobStatus.COMPLETE)
+    await clear_current_job(redis, job.fpga_id)
 
 
 async def handle_run(redis: Redis, host: HostClient, job: Job) -> None:
@@ -84,6 +88,7 @@ async def handle_run(redis: Redis, host: HostClient, job: Job) -> None:
         job: The job record. Must have context["op"], context["address"],
              and optionally context["data"].
     """
+    await set_current_job(redis, job.fpga_id, job.job_id)
     await update_job_status(redis, job.job_id, JobStatus.RUNNING)
 
     request = WishboneRequest(
@@ -97,10 +102,12 @@ async def handle_run(redis: Redis, host: HostClient, job: Job) -> None:
     except HostAgentError as exc:
         await append_job_log(redis, job.job_id, str(exc))
         await update_job_status(redis, job.job_id, JobStatus.FAILED)
+        await clear_current_job(redis, job.fpga_id)
         return
 
     await set_job_result(redis, job.job_id, response.data)
     await update_job_status(redis, job.job_id, JobStatus.COMPLETE)
+    await clear_current_job(redis, job.fpga_id)
 
     session = await get_session(redis, job.fpga_id)
     if session:
@@ -118,6 +125,7 @@ async def handle_reset(redis: Redis, host: HostClient, job: Job) -> None:
         host: Host agent client for reset operations.
         job: The job record. No additional context required.
     """
+    await set_current_job(redis, job.fpga_id, job.job_id)
     await update_job_status(redis, job.job_id, JobStatus.RUNNING)
 
     try:
@@ -126,8 +134,10 @@ async def handle_reset(redis: Redis, host: HostClient, job: Job) -> None:
         await append_job_log(redis, job.job_id, str(exc))
         await update_job_status(redis, job.job_id, JobStatus.FAILED)
         await transition_fpga_state(redis, job.fpga_id, FPGAState.ERROR)
+        await clear_current_job(redis, job.fpga_id)
         return
 
     await delete_session(redis, job.fpga_id)
     await transition_fpga_state(redis, job.fpga_id, FPGAState.IDLE)
     await update_job_status(redis, job.job_id, JobStatus.COMPLETE)
+    await clear_current_job(redis, job.fpga_id)
