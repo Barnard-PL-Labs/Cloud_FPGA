@@ -47,3 +47,18 @@ The system is divided into four layers:
 **Droplet / Orchestration Layer** — A [DigitalOcean](https://www.digitalocean.com/products#core-cloud) General Purpose Droplet (minimum 2 vCPUs, 8 GB RAM) runs the full orchestration stack: an nginx reverse proxy terminating HTTPS, a FastAPI server for the user-facing REST API, Redis for job queues and session state, ten per-FPGA worker processes, and the build server that runs the Amaranth → Verilog → Yosys → nextpnr-ecp5 → ecppack pipeline. Workers issue flash, run, and reset commands to the host agent over Tailscale.
 
 **User Interface Layer** — Users submit a single Amaranth `.py` file whose top-level module conforms to a defined Wishbone B4 slave interface contract. The API returns a session ID on successful programming; subsequent run requests reference that session to send data to and receive results from the live FPGA.
+
+## Repository Structure
+
+```
+Cloud_FPGA/
+├── docs/design/          # design documents and architecture diagrams
+├── firmware/             # LiteX SoC definition and bare-metal VexRiscv firmware
+├── host/                 # hardware agent running on the local host machine
+├── orchestrator/         # full orchestration stack running on the DigitalOcean Droplet
+├── infra/                # deployment configs (nginx, systemd, netplan, udev)
+├── examples/             # reference Amaranth HDL designs
+└── scripts/              # one-off cluster setup and maintenance scripts
+```
+
+Each directory contains its own `README.md` with a description and breakdown of its contents.
