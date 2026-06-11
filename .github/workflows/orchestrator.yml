@@ -1,0 +1,45 @@
+name: orchestrator
+
+on:
+  push:
+    paths:
+      - "orchestrator/**"
+      - ".github/workflows/orchestrator.yml"
+  pull_request:
+    paths:
+      - "orchestrator/**"
+      - ".github/workflows/orchestrator.yml"
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -e "./orchestrator[dev]"
+
+      - name: Lint
+        run: ruff check orchestrator/src orchestrator/tests
+
+      - name: Unit tests
+        run: pytest orchestrator/tests/unit
+
+      - name: Integration tests
+        run: pytest orchestrator/tests/integration -m "not hardware"

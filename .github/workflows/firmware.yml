@@ -1,0 +1,38 @@
+name: firmware
+
+on:
+  push:
+    paths:
+      - "firmware/**"
+      - ".github/workflows/firmware.yml"
+  pull_request:
+    paths:
+      - "firmware/**"
+      - ".github/workflows/firmware.yml"
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -e "./firmware[dev]"
+
+      - name: Lint
+        run: ruff check firmware/src firmware/tests
+
+      - name: Unit tests
+        run: pytest firmware/tests/unit
+
+      - name: Install OSS CAD Suite
+        uses: YosysHQ/setup-oss-cad-suite@v3
+
+      - name: Synthesis check
+        # Placeholder: update this command once soc.py exists
+        run: echo "Synthesis check: add build command here once firmware/src is populated"

@@ -1,0 +1,34 @@
+name: host
+
+on:
+  push:
+    paths:
+      - "host/**"
+      - ".github/workflows/host.yml"
+  pull_request:
+    paths:
+      - "host/**"
+      - ".github/workflows/host.yml"
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -e "./host[dev]"
+
+      - name: Lint
+        run: ruff check host/src host/tests
+
+      - name: Unit tests
+        run: pytest host/tests/unit
+
+      - name: Integration tests
+        run: pytest host/tests/integration
