@@ -52,6 +52,7 @@ class Job(BaseModel):
     fpga_id: int
     type: JobType
     status: JobStatus = JobStatus.QUEUED
+    context: dict = Field(default_factory=dict)
     created_at: datetime = Field(
         default_factory=lambda: datetime.now(timezone.utc)
     )

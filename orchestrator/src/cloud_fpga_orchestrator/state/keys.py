@@ -21,3 +21,8 @@ def job(job_id: str) -> str:
 def job_log(job_id: str) -> str:
     """Return the Redis key for a job's build log."""
     return f"job:{job_id}:log"
+
+
+def job_result(job_id: str) -> str:
+    """Return the Redis key for a run job's response data."""
+    return f"job:{job_id}:result"

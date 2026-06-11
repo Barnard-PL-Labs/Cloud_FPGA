@@ -107,3 +107,16 @@ async def get_job_log(redis: Redis, job_id: UUID) -> str:
     """Return the full build log for a job as a string."""
     value = await redis.get(keys.job_log(str(job_id)))
     return value.decode() if value else ""
+
+
+async def set_job_result(redis: Redis, job_id: UUID, data: list[int]) -> None:
+    """Persist the response data words from a completed run job."""
+    import json
+    await redis.set(keys.job_result(str(job_id)), json.dumps(data))
+
+
+async def get_job_result(redis: Redis, job_id: UUID) -> list[int] | None:
+    """Return the response data words from a completed run job, or None if not found."""
+    import json
+    value = await redis.get(keys.job_result(str(job_id)))
+    return json.loads(value) if value else None
