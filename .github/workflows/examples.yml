@@ -1,0 +1,31 @@
+name: examples
+
+on:
+  push:
+    paths:
+      - "examples/**"
+      - ".github/workflows/examples.yml"
+  pull_request:
+    paths:
+      - "examples/**"
+      - ".github/workflows/examples.yml"
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install amaranth pytest ruff
+
+      - name: Lint
+        run: ruff check examples
+
+      - name: Tests
+        run: pytest examples
