@@ -6,7 +6,7 @@ Full orchestration stack running on the DigitalOcean Droplet. Accepts user HDL s
 
 - `src/cloud_fpga_orchestrator/api/` — FastAPI routes and request/response models
 - `src/cloud_fpga_orchestrator/workers/` — per-FPGA worker processes and job logic
-- `src/cloud_fpga_orchestrator/build/` — Amaranth → Verilog → Yosys → nextpnr-ecp5 → ecppack build pipeline
+- `src/cloud_fpga_orchestrator/compiler/` — Amaranth → Verilog → Yosys → nextpnr-ecp5 → ecppack build pipeline
 - `src/cloud_fpga_orchestrator/state/` — FPGA state machine and Redis interaction
 - `tests/unit/` — state machine transitions, build stage logic, API contract tests
 - `tests/integration/` — real Redis via testcontainers, mocked host agent

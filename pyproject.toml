@@ -1,0 +1,9 @@
+[tool.pytest.ini_options]
+testpaths = [
+    "orchestrator/tests",
+    # host/tests and firmware/tests added as those test suites are written
+]
+asyncio_mode = "auto"
+markers = [
+    "hardware: requires physical FPGA boards (deselect with -m 'not hardware')",
+]
