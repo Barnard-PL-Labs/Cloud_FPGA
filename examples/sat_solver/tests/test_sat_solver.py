@@ -5,8 +5,24 @@ literals, load formula, pulse start, poll done, read model) against the
 simulated SATSlave. No hardware required.
 """
 
+import importlib.util
+from pathlib import Path
+
 from amaranth.sim import Simulator
-from design import CLAUSE_LEN, LIT_BASE, MAX_CLAUSES, MAX_VARS, SATSlave
+
+# Load this example's design.py under a unique module name so multiple
+# examples can be collected in one pytest run without colliding.
+_spec = importlib.util.spec_from_file_location(
+    "sat_solver_design", Path(__file__).resolve().parents[1] / "design.py"
+)
+_design = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(_design)
+
+CLAUSE_LEN = _design.CLAUSE_LEN
+LIT_BASE = _design.LIT_BASE
+MAX_CLAUSES = _design.MAX_CLAUSES
+MAX_VARS = _design.MAX_VARS
+SATSlave = _design.SATSlave
 
 
 def check_model(model: int, clauses: list[list[int]]) -> bool:

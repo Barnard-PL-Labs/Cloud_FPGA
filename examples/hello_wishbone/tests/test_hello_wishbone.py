@@ -5,8 +5,21 @@ registered single-cycle ack that clears when stb drops, plus write/read
 data integrity with no aliasing between addresses.
 """
 
+import importlib.util
+from pathlib import Path
+
 from amaranth.sim import Simulator
-from design import DEPTH, EchoSlave
+
+# Load this example's design.py under a unique module name so multiple
+# examples can be collected in one pytest run without colliding.
+_spec = importlib.util.spec_from_file_location(
+    "hello_wishbone_design", Path(__file__).resolve().parents[1] / "design.py"
+)
+_design = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(_design)
+
+DEPTH = _design.DEPTH
+EchoSlave = _design.EchoSlave
 
 
 def run_transactions(script):
