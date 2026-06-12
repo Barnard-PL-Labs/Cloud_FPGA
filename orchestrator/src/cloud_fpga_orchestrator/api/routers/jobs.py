@@ -4,11 +4,10 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, Path
 from redis.asyncio import Redis
 
-from ...state import get_job, get_job_log, update_job_status
-from ...state import keys
+from ...state import get_job, get_job_log, keys, update_job_status
 from ...state.models import JobStatus
 from ...state.store import get_job_result
-from ..deps import get_api_key, get_redis, get_session_id
+from ..deps import get_api_key, get_redis
 from ..models import ErrorResponse, JobResponse, RunResultResponse
 
 router = APIRouter(prefix="/fpga/{fpga_id}/jobs", tags=["jobs"])
@@ -32,7 +31,10 @@ async def get_job_status(
     if job is None or job.fpga_id != fpga_id:
         raise HTTPException(
             status_code=404,
-            detail={"error": "job_not_found", "message": f"Job {job_id} not found for FPGA {fpga_id}."},
+            detail={
+                "error": "job_not_found",
+                "message": f"Job {job_id} not found for FPGA {fpga_id}.",
+            },
         )
     return JobResponse(
         job_id=job.job_id,
@@ -60,7 +62,10 @@ async def get_logs(
     if job is None or job.fpga_id != fpga_id:
         raise HTTPException(
             status_code=404,
-            detail={"error": "job_not_found", "message": f"Job {job_id} not found for FPGA {fpga_id}."},
+            detail={
+                "error": "job_not_found",
+                "message": f"Job {job_id} not found for FPGA {fpga_id}.",
+            },
         )
     return await get_job_log(redis, job_id)
 
@@ -81,12 +86,18 @@ async def get_run_result(
     if job is None or job.fpga_id != fpga_id:
         raise HTTPException(
             status_code=404,
-            detail={"error": "job_not_found", "message": f"Job {job_id} not found for FPGA {fpga_id}."},
+            detail={
+                "error": "job_not_found",
+                "message": f"Job {job_id} not found for FPGA {fpga_id}.",
+            },
         )
     if job.status != JobStatus.COMPLETE:
         raise HTTPException(
             status_code=409,
-            detail={"error": "job_not_complete", "message": f"Job {job_id} is not yet complete."},
+            detail={
+                "error": "job_not_complete",
+                "message": f"Job {job_id} is not yet complete.",
+            },
         )
     data = await get_job_result(redis, job_id)
     return RunResultResponse(ok=data is not None, data=data or [])
@@ -112,12 +123,20 @@ async def cancel_job(
     if job is None or job.fpga_id != fpga_id:
         raise HTTPException(
             status_code=404,
-            detail={"error": "job_not_found", "message": f"Job {job_id} not found for FPGA {fpga_id}."},
+            detail={
+                "error": "job_not_found",
+                "message": f"Job {job_id} not found for FPGA {fpga_id}.",
+            },
         )
     if job.status != JobStatus.QUEUED:
         raise HTTPException(
             status_code=409,
-            detail={"error": "job_not_cancellable", "message": f"Job {job_id} is {job.status} and cannot be cancelled."},
+            detail={
+                "error": "job_not_cancellable",
+                "message": (
+                    f"Job {job_id} is {job.status} and cannot be cancelled."
+                ),
+            },
         )
     await redis.lrem(keys.fpga_queue(fpga_id), 0, str(job_id))
     await update_job_status(redis, job_id, JobStatus.CANCELLED)

@@ -31,7 +31,11 @@ class WishboneRequest:
     def to_bytes(self) -> bytes:
         """Serialize the request to its wire representation."""
         length = len(self.data)
-        header = struct.pack(">B", self.op) + struct.pack(">I", length)[1:] + struct.pack(">I", self.address)
+        header = (
+            struct.pack(">B", self.op)
+            + struct.pack(">I", length)[1:]
+            + struct.pack(">I", self.address)
+        )
         words = struct.pack(f">{length}I", *self.data) if self.data else b""
         return header + words
 

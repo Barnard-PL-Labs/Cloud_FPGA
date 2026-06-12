@@ -1,5 +1,5 @@
-from contextlib import asynccontextmanager
 from collections.abc import AsyncGenerator
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
@@ -19,7 +19,10 @@ def create_app() -> FastAPI:
     """Create and configure the FastAPI application."""
     app = FastAPI(
         title="Cloud FPGA Orchestrator",
-        description="REST API for submitting HDL designs and running jobs on remote FPGAs.",
+        description=(
+            "REST API for submitting HDL designs and running jobs on remote"
+            " FPGAs."
+        ),
         version="0.1.0",
         lifespan=lifespan,
     )

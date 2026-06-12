@@ -3,7 +3,8 @@ import tempfile
 from pathlib import Path
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, Path as FPath, UploadFile
+from fastapi import APIRouter, Depends, HTTPException, UploadFile
+from fastapi import Path as FPath
 from redis.asyncio import Redis
 
 from ...state import (
@@ -15,8 +16,8 @@ from ...state import (
     get_session,
     transition_fpga_state,
 )
-from ...state.store import get_current_job
 from ...state.models import JobStatus
+from ...state.store import get_current_job
 from ..deps import get_api_key, get_redis, get_session_id
 from ..models import (
     ErrorResponse,
@@ -32,7 +33,10 @@ router = APIRouter(tags=["fpga"])
 FPGAId = Annotated[int, FPath(ge=0, le=9)]
 
 _NUM_FPGAS = 10
-_UPLOADS_DIR = Path(os.environ.get("UPLOADS_DIR", tempfile.gettempdir())) / "cloud_fpga_uploads"
+_UPLOADS_DIR = (
+    Path(os.environ.get("UPLOADS_DIR", tempfile.gettempdir()))
+    / "cloud_fpga_uploads"
+)
 
 
 @router.get("/fpga", response_model=list[FPGASummary])
@@ -108,7 +112,10 @@ async def submit(
     if state != FPGAState.IDLE:
         raise HTTPException(
             status_code=409,
-            detail={"error": "fpga_not_idle", "message": f"FPGA {fpga_id} is {state}, not idle."},
+            detail={
+                "error": "fpga_not_idle",
+                "message": f"FPGA {fpga_id} is {state}, not idle.",
+            },
         )
 
     _UPLOADS_DIR.mkdir(parents=True, exist_ok=True)
@@ -145,7 +152,10 @@ async def run(
     if state != FPGAState.RESERVED:
         raise HTTPException(
             status_code=409,
-            detail={"error": "fpga_not_reserved", "message": f"FPGA {fpga_id} is {state}, not reserved."},
+            detail={
+                "error": "fpga_not_reserved",
+                "message": f"FPGA {fpga_id} is {state}, not reserved.",
+            },
         )
 
     job = Job(
@@ -179,7 +189,12 @@ async def reset(
     if state not in {FPGAState.RESERVED, FPGAState.ERROR}:
         raise HTTPException(
             status_code=409,
-            detail={"error": "fpga_not_resettable", "message": f"FPGA {fpga_id} is {state} and cannot be reset."},
+            detail={
+                "error": "fpga_not_resettable",
+                "message": (
+                    f"FPGA {fpga_id} is {state} and cannot be reset."
+                ),
+            },
         )
 
     job = Job(

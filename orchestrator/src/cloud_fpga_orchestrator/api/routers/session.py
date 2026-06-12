@@ -1,5 +1,4 @@
 from typing import Annotated
-from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Path
 from redis.asyncio import Redis
@@ -30,7 +29,10 @@ async def get_session_info(
     if session is None:
         raise HTTPException(
             status_code=404,
-            detail={"error": "no_active_session", "message": f"FPGA {fpga_id} has no active session."},
+            detail={
+                "error": "no_active_session",
+                "message": f"FPGA {fpga_id} has no active session.",
+            },
         )
     return SessionResponse(
         session_id=session.session_id,
@@ -60,7 +62,10 @@ async def release_session(
     if session is None:
         raise HTTPException(
             status_code=404,
-            detail={"error": "no_active_session", "message": f"FPGA {fpga_id} has no active session."},
+            detail={
+                "error": "no_active_session",
+                "message": f"FPGA {fpga_id} has no active session.",
+            },
         )
     job = Job(
         fpga_id=fpga_id,

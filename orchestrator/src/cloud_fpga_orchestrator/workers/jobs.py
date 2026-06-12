@@ -16,7 +16,12 @@ from ..state import (
     transition_fpga_state,
     update_job_status,
 )
-from ..state.store import append_job_log, clear_current_job, set_current_job, set_job_result
+from ..state.store import (
+    append_job_log,
+    clear_current_job,
+    set_current_job,
+    set_job_result,
+)
 from .host_client import HostAgentError, HostClient
 from .protocol import WishboneOp, WishboneRequest
 

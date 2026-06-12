@@ -5,7 +5,6 @@ from pydantic import BaseModel, Field
 
 from ..state.models import FPGAState, JobStatus, JobType
 
-
 # ---------------------------------------------------------------------------
 # Requests
 # ---------------------------------------------------------------------------
@@ -16,7 +15,9 @@ class RunRequest(BaseModel):
 
     op: int = Field(description="Wishbone opcode: 1 = write, 2 = read")
     address: int = Field(description="Wishbone byte address")
-    data: list[int] = Field(default_factory=list, description="32-bit data words (write only)")
+    data: list[int] = Field(
+        default_factory=list, description="32-bit data words (write only)"
+    )
 
 
 # ---------------------------------------------------------------------------

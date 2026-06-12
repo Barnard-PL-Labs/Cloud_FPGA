@@ -6,8 +6,7 @@ from uuid import UUID
 
 from redis.asyncio import Redis
 
-from ..state import JobStatus, JobType, get_job, update_job_status
-from ..state import keys
+from ..state import JobStatus, JobType, get_job, keys, update_job_status
 from .host_client import HostClient
 from .jobs import handle_build_and_program, handle_reset, handle_run
 
@@ -51,7 +50,9 @@ async def run_worker(
         job = await get_job(redis, job_id)
 
         if job is None:
-            logger.warning("FPGA %d: job %s not found in Redis, skipping", fpga_id, job_id)
+            logger.warning(
+                "FPGA %d: job %s not found in Redis, skipping", fpga_id, job_id
+            )
             continue
 
         logger.info("FPGA %d: starting %s job %s", fpga_id, job.type, job_id)

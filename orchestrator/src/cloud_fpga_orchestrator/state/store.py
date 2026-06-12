@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from uuid import UUID
 
 from redis.asyncio import Redis
@@ -49,7 +49,7 @@ async def create_session(
     session = Session(
         fpga_id=fpga_id,
         owner=owner,
-        expires_at=datetime.now(timezone.utc) + timedelta(seconds=ttl_seconds),
+        expires_at=datetime.now(UTC) + timedelta(seconds=ttl_seconds),
     )
     await redis.set(
         keys.fpga_session(fpga_id),
@@ -94,7 +94,7 @@ async def update_job_status(
     if job is None:
         raise ValueError(f"Job {job_id} not found")
     job.status = status
-    job.updated_at = datetime.now(timezone.utc)
+    job.updated_at = datetime.now(UTC)
     await redis.set(keys.job(str(job_id)), job.model_dump_json())
 
 

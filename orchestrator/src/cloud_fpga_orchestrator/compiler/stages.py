@@ -26,7 +26,15 @@ def amaranth_to_verilog(design_path: Path, output_dir: Path) -> Path:
     # TODO: replace with real conversion command once firmware/ SoC is defined.
     # Expected command: python -m amaranth generate verilog design.py UserDesign
     result = run_sandboxed(
-        ["python", "-m", "amaranth", "generate", "verilog", str(design_path), "UserDesign"],
+        [
+            "python",
+            "-m",
+            "amaranth",
+            "generate",
+            "verilog",
+            str(design_path),
+            "UserDesign",
+        ],
         cwd=output_dir,
     )
     if not result.success:
@@ -52,7 +60,8 @@ def merge_soc(user_verilog: Path, output_dir: Path) -> Path:
         SoCMergeError: If the LiteX merge step fails.
     """
     # TODO: replace with real LiteX SoC build command once firmware/ is defined.
-    # Expected command: python firmware/src/cloud_fpga_firmware/soc.py --user-design user_design.v
+    # Expected command:
+    # python firmware/src/cloud_fpga_firmware/soc.py --user-design user_design.v
     result = run_sandboxed(
         ["python", "-m", "cloud_fpga_firmware.soc", "--user-design", str(user_verilog)],
         cwd=output_dir,
