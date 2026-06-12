@@ -4,26 +4,23 @@ on:
   push:
     paths:
       - "orchestrator/**"
+      - "pyproject.toml"
+      - "Makefile"
       - ".github/workflows/orchestrator.yml"
   pull_request:
     paths:
       - "orchestrator/**"
+      - "pyproject.toml"
+      - "Makefile"
       - ".github/workflows/orchestrator.yml"
 
 jobs:
   test:
     runs-on: ubuntu-latest
 
-    services:
-      redis:
-        image: redis:7
-        ports:
-          - 6379:6379
-        options: >-
-          --health-cmd "redis-cli ping"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
+    # Redis is managed by testcontainers — no service container needed.
+    env:
+      TESTCONTAINERS_RYUK_DISABLED: "true"
 
     steps:
       - uses: actions/checkout@v4
@@ -39,7 +36,10 @@ jobs:
         run: ruff check orchestrator/src orchestrator/tests
 
       - name: Unit tests
-        run: pytest orchestrator/tests/unit
+        run: pytest orchestrator/tests/unit -v
 
       - name: Integration tests
-        run: pytest orchestrator/tests/integration -m "not hardware"
+        run: pytest orchestrator/tests/integration -v -m "not hardware"
+
+      - name: E2E tests
+        run: pytest orchestrator/tests/e2e -v -m "not hardware"
