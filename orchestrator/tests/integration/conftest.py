@@ -1,6 +1,6 @@
+import httpx
 import pytest
 import pytest_asyncio
-import httpx
 from redis.asyncio import ConnectionPool, Redis
 from testcontainers.redis import RedisContainer
 

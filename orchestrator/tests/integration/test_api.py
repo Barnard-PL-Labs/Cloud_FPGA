@@ -1,7 +1,4 @@
-import io
 from uuid import uuid4
-
-import pytest
 
 from cloud_fpga_orchestrator.state.models import FPGAState, Job, JobStatus, JobType
 from cloud_fpga_orchestrator.state.store import (
@@ -128,7 +125,9 @@ class TestJobStatus:
         assert resp.status_code == 200
         assert resp.json()["data"] == [0x1, 0x2]
 
-    async def test_get_result_incomplete_job_returns_409(self, app_client, redis_client):
+    async def test_get_result_incomplete_job_returns_409(
+        self, app_client, redis_client
+    ):
         job = Job(fpga_id=0, type=JobType.RUN)
         await enqueue_job(redis_client, job)
         resp = await app_client.get(f"/fpga/0/jobs/{job.job_id}/result")
@@ -208,7 +207,7 @@ class TestSessionEndpoints:
         assert resp.status_code == 404
 
     async def test_get_session_returns_session_data(self, app_client, redis_client):
-        session = await create_session(redis_client, 0, "alice", 3600)
+        await create_session(redis_client, 0, "alice", 3600)
         resp = await app_client.get("/fpga/0/session")
         assert resp.status_code == 200
         body = resp.json()

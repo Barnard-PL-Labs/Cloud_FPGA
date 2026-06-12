@@ -17,8 +17,6 @@ Flow under test:
 import asyncio
 from unittest.mock import AsyncMock, patch
 
-import pytest
-
 from cloud_fpga_orchestrator.compiler.errors import SynthesisError
 from cloud_fpga_orchestrator.compiler.pipeline import BuildResult
 from cloud_fpga_orchestrator.state.models import FPGAState

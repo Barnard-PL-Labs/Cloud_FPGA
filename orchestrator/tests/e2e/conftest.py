@@ -1,11 +1,11 @@
 import asyncio
+from unittest.mock import AsyncMock
 
 import httpx
 import pytest
 import pytest_asyncio
 from redis.asyncio import ConnectionPool, Redis
 from testcontainers.redis import RedisContainer
-from unittest.mock import AsyncMock
 
 from cloud_fpga_orchestrator.workers.protocol import ResponseStatus, WishboneResponse
 from cloud_fpga_orchestrator.workers.runner import run_worker
@@ -33,7 +33,9 @@ async def redis_client(redis_container):
 def mock_host():
     host = AsyncMock()
     host.flash = AsyncMock(return_value=None)
-    host.run = AsyncMock(return_value=WishboneResponse(status=ResponseStatus.OK, data=[0x42]))
+    host.run = AsyncMock(
+        return_value=WishboneResponse(status=ResponseStatus.OK, data=[0x42])
+    )
     host.reset = AsyncMock(return_value=None)
     return host
 
@@ -44,7 +46,10 @@ async def worker(redis_client, mock_host):
     shutdown = asyncio.Event()
     semaphore = asyncio.Semaphore(2)
     task = asyncio.create_task(
-        run_worker(redis_client, mock_host, fpga_id=0, build_semaphore=semaphore, shutdown=shutdown)
+        run_worker(
+            redis_client, mock_host,
+            fpga_id=0, build_semaphore=semaphore, shutdown=shutdown,
+        )
     )
     yield shutdown
     shutdown.set()

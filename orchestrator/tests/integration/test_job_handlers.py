@@ -2,7 +2,7 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
-from cloud_fpga_orchestrator.compiler.errors import BuildError, SynthesisError
+from cloud_fpga_orchestrator.compiler.errors import SynthesisError
 from cloud_fpga_orchestrator.compiler.pipeline import BuildResult
 from cloud_fpga_orchestrator.state.models import FPGAState, Job, JobStatus, JobType
 from cloud_fpga_orchestrator.state.store import (
@@ -28,7 +28,9 @@ from cloud_fpga_orchestrator.workers.protocol import ResponseStatus, WishboneRes
 def mock_host():
     host = AsyncMock()
     host.flash = AsyncMock(return_value=None)
-    host.run = AsyncMock(return_value=WishboneResponse(status=ResponseStatus.OK, data=[]))
+    host.run = AsyncMock(
+        return_value=WishboneResponse(status=ResponseStatus.OK, data=[])
+    )
     host.reset = AsyncMock(return_value=None)
     return host
 
@@ -152,7 +154,9 @@ class TestHandleBuildAndProgram:
 
         assert await get_fpga_state(redis_client, 0) == FPGAState.IDLE
 
-    async def test_build_error_marks_job_failed(self, redis_client, mock_host, tmp_path):
+    async def test_build_error_marks_job_failed(
+        self, redis_client, mock_host, tmp_path
+    ):
         source = tmp_path / "bad.py"
         source.write_text("# bad")
 
@@ -173,7 +177,9 @@ class TestHandleBuildAndProgram:
         updated = await get_job(redis_client, job.job_id)
         assert updated.status == JobStatus.FAILED
 
-    async def test_flash_error_marks_state_error(self, redis_client, mock_host, tmp_path):
+    async def test_flash_error_marks_state_error(
+        self, redis_client, mock_host, tmp_path
+    ):
         source = tmp_path / "design.py"
         source.write_text("# design")
         fake_bit = tmp_path / "out.bit"
@@ -199,7 +205,9 @@ class TestHandleBuildAndProgram:
 
         assert await get_fpga_state(redis_client, 0) == FPGAState.ERROR
 
-    async def test_flash_error_marks_job_failed(self, redis_client, mock_host, tmp_path):
+    async def test_flash_error_marks_job_failed(
+        self, redis_client, mock_host, tmp_path
+    ):
         source = tmp_path / "design.py"
         source.write_text("# design")
         fake_bit = tmp_path / "out.bit"
@@ -291,7 +299,7 @@ class TestHandleRun:
 
     async def test_success_renews_session(self, redis_client, mock_host):
         await _put_fpga_in_reserved(redis_client, 1)
-        original_session = await create_session(redis_client, 1, "alice", 3600)
+        await create_session(redis_client, 1, "alice", 3600)
 
         job = Job(
             fpga_id=1,

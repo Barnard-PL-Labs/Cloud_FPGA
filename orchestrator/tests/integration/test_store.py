@@ -1,5 +1,6 @@
-import pytest
 from uuid import uuid4
+
+import pytest
 
 from cloud_fpga_orchestrator.state.models import FPGAState, Job, JobStatus, JobType
 from cloud_fpga_orchestrator.state.store import (

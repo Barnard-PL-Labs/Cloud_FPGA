@@ -1,15 +1,14 @@
-import pytest
-from datetime import datetime, timezone, timedelta
+from datetime import UTC, datetime, timedelta
 from uuid import UUID
 
 from cloud_fpga_orchestrator.state.models import (
+    VALID_TRANSITIONS,
     FPGARecord,
     FPGAState,
     Job,
     JobStatus,
     JobType,
     Session,
-    VALID_TRANSITIONS,
 )
 
 
@@ -26,13 +25,19 @@ class TestValidTransitions:
         assert VALID_TRANSITIONS[FPGAState.IDLE] == {FPGAState.QUEUED}
 
     def test_queued_to_building_or_idle(self):
-        assert VALID_TRANSITIONS[FPGAState.QUEUED] == {FPGAState.BUILDING, FPGAState.IDLE}
+        assert VALID_TRANSITIONS[FPGAState.QUEUED] == {
+            FPGAState.BUILDING, FPGAState.IDLE
+        }
 
     def test_building_to_programming_or_idle(self):
-        assert VALID_TRANSITIONS[FPGAState.BUILDING] == {FPGAState.PROGRAMMING, FPGAState.IDLE}
+        assert VALID_TRANSITIONS[FPGAState.BUILDING] == {
+            FPGAState.PROGRAMMING, FPGAState.IDLE
+        }
 
     def test_programming_to_reserved_or_error(self):
-        assert VALID_TRANSITIONS[FPGAState.PROGRAMMING] == {FPGAState.RESERVED, FPGAState.ERROR}
+        assert VALID_TRANSITIONS[FPGAState.PROGRAMMING] == {
+            FPGAState.RESERVED, FPGAState.ERROR
+        }
 
     def test_reserved_can_self_transition(self):
         assert FPGAState.RESERVED in VALID_TRANSITIONS[FPGAState.RESERVED]
@@ -83,13 +88,13 @@ class TestJob:
 
 class TestSession:
     def test_unique_session_ids(self):
-        expires = datetime.now(timezone.utc) + timedelta(hours=1)
+        expires = datetime.now(UTC) + timedelta(hours=1)
         a = Session(fpga_id=0, owner="alice", expires_at=expires)
         b = Session(fpga_id=0, owner="alice", expires_at=expires)
         assert a.session_id != b.session_id
 
     def test_fields_stored(self):
-        expires = datetime.now(timezone.utc) + timedelta(hours=1)
+        expires = datetime.now(UTC) + timedelta(hours=1)
         s = Session(fpga_id=5, owner="bob", expires_at=expires)
         assert s.fpga_id == 5
         assert s.owner == "bob"

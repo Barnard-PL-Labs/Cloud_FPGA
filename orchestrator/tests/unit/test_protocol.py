@@ -33,7 +33,9 @@ class TestWishboneRequestToBytes:
         assert raw[0] == WishboneOp.WRITE
 
     def test_write_length_field(self):
-        raw = WishboneRequest(op=WishboneOp.WRITE, address=0x0, data=[0x1, 0x2]).to_bytes()
+        raw = WishboneRequest(
+            op=WishboneOp.WRITE, address=0x0, data=[0x1, 0x2]
+        ).to_bytes()
         # 3-byte length field should be 2
         assert raw[1:4] == b"\x00\x00\x02"
 
@@ -44,7 +46,9 @@ class TestWishboneRequestToBytes:
         assert struct.unpack(">I", raw[12:16])[0] == 0xCAFEBABE
 
     def test_write_total_length_with_data(self):
-        raw = WishboneRequest(op=WishboneOp.WRITE, address=0x0, data=[0x1, 0x2, 0x3]).to_bytes()
+        raw = WishboneRequest(
+            op=WishboneOp.WRITE, address=0x0, data=[0x1, 0x2, 0x3]
+        ).to_bytes()
         assert len(raw) == 8 + 3 * 4
 
     def test_empty_data_write(self):
